@@ -80,35 +80,33 @@ for face in faces:
 
     nose_p_32 = (landmarks.part(32).x, landmarks.part(32).y)
     nose_p_34 = (landmarks.part(34).x, landmarks.part(34).y)
+    nose_p_31 = (landmarks.part(31).x, landmarks.part(31).y)
+    nose_p_35 = (landmarks.part(35).x, landmarks.part(35).y)
 
     mouth_p_48 = (landmarks.part(48).x, landmarks.part(48).y)
     mouth_p_49 = (landmarks.part(49).x, landmarks.part(49).y)
     mouth_p_53 = (landmarks.part(53).x, landmarks.part(53).y)
     mouth_p_54 = (landmarks.part(54).x, landmarks.part(54).y)
+    mouth_p_51 = (landmarks.part(51).x, landmarks.part(51).y)
+    mouth_p_62 = (landmarks.part(62).x, landmarks.part(62).y)
 
     mouth_left = mouth_p_49
     mouth_right = mouth_p_53
-    nose = (np.mean((nose_p_32[0], nose_p_34[0])), np.mean((nose_p_32[1], nose_p_34[1])))
-
+    #nose = (np.mean((nose_p_32[0], nose_p_34[0])), np.mean((nose_p_32[1], nose_p_34[1])))
+    nose = (np.mean((nose_p_31[0], nose_p_35[0])), np.mean((nose_p_31[1], nose_p_35[1])))
 
     # X coord between left/right mouth points
     center_x = np.mean((mouth_left[0],mouth_right[0]))
 
     # 2d distance between mouth points, use as mask rectangle width
-    #mouth_width = np.sqrt((mouth_left[0]-mouth_right[0])**2 + (mouth_left[1]-mouth_right[1])**2)
     mouth_width = distance(mouth_p_48, mouth_p_54)
 
     # Get distance from nose to middle of mouth, use as mask rectangle height
-    max_mouth_y = np.max((mouth_left[1],mouth_right[1]))
-    min_mouth_y = np.min((mouth_left[1],mouth_right[1]))
-    if nose[1] < min_mouth_y:
-        nose_top_mouth_y_dist = abs(nose[1]-min_mouth_y) # right side up face
-    else:
-        nose_top_mouth_y_dist = abs(nose[1]-max_mouth_y) # upside down face
-    nose_to_mouth_dist = nose_top_mouth_y_dist + 0.5*(max_mouth_y-min_mouth_y) # ydist from nose to mouth
+    nose_to_mouth_dist = distance(nose, mouth_p_62)
 
     # Y coord, set as halfway from nose to mouth
-    if nose[1] < min_mouth_y:
+    # TODO: account for angle
+    if nose[1] < mouth_p_51[1]:
         center_y = nose[1] + nose_to_mouth_dist/2
     else:
         center_y = nose[1] - nose_to_mouth_dist/2
@@ -116,9 +114,9 @@ for face in faces:
     # Set rectangle properties for rectangle moustache mask
     # points are x, y
     rect_center = (center_x, center_y)
-    rect_len_width = (mouth_width, nose_to_mouth_dist)
-    rect_angle = np.arctan2(max_mouth_y-min_mouth_y, abs(mouth_left[0]-mouth_right[0]))*180/np.pi # rotate cw off x axis
-    if mouth_right[1] < mouth_left[1]:
+    rect_len_width = (mouth_width*1.25, nose_to_mouth_dist*1.0)
+    rect_angle = np.arctan2(abs(mouth_p_48[1]-mouth_p_54[1]), abs(mouth_p_48[0]-mouth_p_54[0]))*180/np.pi # rotate cw off x axis
+    if mouth_p_54[1] < mouth_p_48[1]:
         rect_angle *= -1 # get rotation right
 
     # Create rectangle moustache mask
@@ -134,8 +132,8 @@ if not os.path.exists('bin'):
 
 cv2.imwrite("bin/" + image_name, img)
 
-#cv2.imshow(winname="Face", mat=img)
-#cv2.waitKey(delay=0)
+#cv2.imshow("Face", cv2.resize(img,(512,512)))
+#cv2.waitKey(0)
 #cv2.destroyAllWindows()
 
 end_time = time.time()
