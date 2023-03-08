@@ -2,6 +2,10 @@ from mtcnn.mtcnn import MTCNN
 import matplotlib.pyplot as plt
 import cv2
 import numpy as np
+import time
+import os
+
+start_time = time.time()
 
 # Read image
 image = cv2.imread('./ims/dan.png')
@@ -75,10 +79,18 @@ size = 512
 image     = cv2.resize(image,(512,512))
 image_out = cv2.resize(image_out,(512,512))
 image_out_show = image_out.astype('uint8')
+imageOG = cv2.resize(imageOG,(512,512))
+
+if not os.path_exists('bin'):
+    os.makedirs('bin')
+
+cv2.imwrite('./bin/input_image.png', imageOG)
+cv2.imwrite('./bin/mask_image.png', image_out)
+
+end_time = time.time()
+print("Took ", (end_time - start_time) * 1000, "ms")
+
 cv2.imshow('Image',np.hstack((image,image_out_show)))
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-imageOG = cv2.resize(imageOG,(512,512))
-cv2.imwrite('./ims/input_image.png',imageOG)
-cv2.imwrite('./ims/mask_image.png',image_out)
