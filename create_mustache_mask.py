@@ -81,7 +81,7 @@ image_out = cv2.resize(image_out,(512,512))
 image_out_show = image_out.astype('uint8')
 imageOG = cv2.resize(imageOG,(512,512))
 
-if not os.path_exists('bin'):
+if not os.path.exists('bin'):
     os.makedirs('bin')
 
 cv2.imwrite('./bin/input_image.png', imageOG)
