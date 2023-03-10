@@ -3,6 +3,8 @@ import dlib
 import cv2
 import time
 import os
+import math
+
 
 """
 Jaw Points = 0–16
@@ -50,14 +52,17 @@ def distance(p0, p1):
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
-image_name = "sa.png"
+image_name = "glo.jpg"
 
 img = cv2.imread("ims/" + image_name)
+
+img_original = img.copy()
 
 # actual timing starts here
 start_time = time.time()
 
 gray = cv2.cvtColor(src=img, code=cv2.COLOR_BGR2GRAY)
+image_out = np.zeros((img.shape))
 
 faces = detector(gray)
 for face in faces:
@@ -123,14 +128,34 @@ for face in faces:
     box = cv2.boxPoints((rect_center, rect_len_width, rect_angle))
     box = np.int0(box)
 
-    cv2.drawContours(img, [box], 0, (0,0,0), -1)
+    img = cv2.drawContours(img, [box], 0, (0,0,0), -1)
+    image_out = cv2.drawContours(image_out,[box],0,(255,255,255),-1)
 
 
 
 if not os.path.exists('bin'):
     os.makedirs('bin')
 
-cv2.imwrite("bin/" + image_name, img)
+# resize
+size = 640
+img_width = img.shape[0]
+img_height = img.shape[1]
+aspect_ratio = img_width / img_height
+
+img_width = size
+img_height = img_width * aspect_ratio
+
+img_width=int(math.floor(img_width / 8) * 8)
+img_height=int(math.floor(img_height / 8) * 8)
+
+img       = cv2.resize(img,(img_width, img_height))
+image_out = cv2.resize(image_out,(img_width, img_height))
+
+img_original = cv2.resize(img_original,(img_width, img_height))
+
+cv2.imwrite("bin/debug_" + image_name, img)
+cv2.imwrite("bin/mask_" + image_name, image_out)
+cv2.imwrite("bin/input_" + image_name, img_original)
 
 #cv2.imshow("Face", cv2.resize(img,(512,512)))
 #cv2.waitKey(0)
